@@ -23,8 +23,19 @@ jobs:
         run: |
           urls=""
           for file in ${{ steps.files.outputs.files }}; do
-            paste_url=$(curl -X POST -H "Content-Type: application/json" -d '{"api_dev_key": "${{ secrets.PASTEBIN_API_KEY }}", "api_option": "paste", "api_paste_name": "'"$file"'", "api_paste_code": "$(cat '$file')"}' https://pastebin.com/api/api_post.php | jq -r '.[].url')
-            urls="$urls\n- [$file]($paste_url)"
+            file_contents=$(cat "$file")
+            paste_name=$(basename "$file")
+            api_key="${{ secrets.PASTEBIN_API_KEY }}"
+            response=$(curl -s -X POST https://pastebin.com/api/api_post.php \
+              --data-urlencode "api_dev_key=$api_key" \
+              --data-urlencode "api_option=paste" \
+              --data-urlencode "api_paste_name=$paste_name" \
+              --data-urlencode "api_paste_code=$file_contents" \ 
+              --data-urlencode "api_paste_private=1" \
+              --data-urlencode "api_paste_expire_date=N" \
+              --data-urlenvode "api_paste_format=lua" )
+            paste_url=$(echo "$response" | jq -r '.[].url')
+            urls="$urls\n- [$paste_name]($paste_url)"
           done
           echo "::set-output name=urls::$urls"
       - name: Update README
