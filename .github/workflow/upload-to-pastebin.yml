@@ -1,0 +1,36 @@
+name: Upload to Pastebin
+on:
+  push:
+    branches: [ main ]
+jobs:
+  pastebin:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl jq
+    - name: Determine new files
+      id: new_files
+      run: |
+        new_files=$(git diff --name-only HEAD^ HEAD scripts/)
+        echo "::set-output name=files::$new_files"
+    - name: Upload new files to Pastebin
+      id: upload
+      run: |
+        if [[ -n "${{ steps.new_files.outputs.files }}" ]]; then
+          paste_url=$(curl -X POST -H "Content-Type: application/json" -d '{"api_dev_key": "${{ secrets.PASTEBIN_API_KEY }}", "api_option": "paste", "api_paste_name": "New Files", "api_paste_code": "$(cat ${{ steps.new_files.outputs.files }})"}' https://pastebin.com/api/api_post.php | jq -r '.[].url')
+          echo "::set-output name=url::$paste_url"
+        else
+          echo "No new files to upload."
+        fi
+    - name: Update README
+      if: success() && steps.upload.outputs.url != null
+      run: |
+        sed -i -E "s#(\\* \\[New files\\]\\().*(\\))#\\1${{ steps.upload.outputs.url }}\\2#" README.md
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -m "Update README with new Pastebin link" -a
+        git push
