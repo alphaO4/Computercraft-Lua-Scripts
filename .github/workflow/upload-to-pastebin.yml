@@ -31,7 +31,7 @@ jobs:
               --data-urlencode "api_option=paste" \
               --data-urlencode "api_paste_name=$paste_name" \
               --data-urlencode "api_paste_code=$file_contents" \ 
-              --data-urlencode "api_paste_private=1" \
+              --data-urlencode "api_paste_private=0" \
               --data-urlencode "api_paste_expire_date=N" \
               --data-urlenvode "api_paste_format=lua" )
             paste_url=$(echo "$response" | jq -r '.[].url')
