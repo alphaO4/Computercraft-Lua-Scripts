@@ -2,6 +2,7 @@ name: Upload to Pastebin
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 jobs:
   pastebin:
     runs-on: ubuntu-latest
@@ -16,7 +17,7 @@ jobs:
         id: files
         run: |
           changed_files=$(git diff-tree --no-commit-id --name-only -r $(git hash-object -t tree /dev/null)..HEAD)
-          new_files=$(echo "${changed_files}" | grep -E '^scripts/' | xargs -I{} sh -c 'test -f "{}" && echo "{}"')
+          new_files=$(echo "${changed_files}" | grep -E '^script/' | xargs -I{} sh -c 'test -f "{}" && echo "{}"')
           echo "::set-output name=files::$new_files"
       - name: Upload files to Pastebin
         id: upload
