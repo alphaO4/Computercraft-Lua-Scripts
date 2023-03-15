@@ -22,7 +22,7 @@ jobs:
       - name: Upload files to Pastebin
         id: upload
         run: |
-          find scripts/ -type f -name '*.lua' -print0 | while IFS= read -r -d '' file; do
+          find scripts/ -type f -name '*.lua' -print | while IFS= read -r -d '' file; do
             file_contents=$(cat "$file")
             paste_name=$(basename "$file")
             api_key="${{ secrets.PASTEBIN_API_KEY }}"
