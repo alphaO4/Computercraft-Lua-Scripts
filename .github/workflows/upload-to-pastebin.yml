@@ -18,7 +18,7 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: |
-            script/*.lua
+            scripts/*.lua
 
       - name: Upload files to Pastebin
         if: steps.changed-files-specific.outputs.any_changed == 'true'
