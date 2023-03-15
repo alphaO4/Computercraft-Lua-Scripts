@@ -35,8 +35,10 @@ jobs:
               --data-urlencode "api_paste_private=1" \
               --data-urlencode "api_paste_expire_date=N" \
               --data-urlencode "api_paste_format=lua" )
-            paste_url=$(echo "$response" | jq -r '.[].url')
-            urls="$urls\n- [$paste_name]($paste_url)"
+            paste_url= response
+            urls="$urls\n- [$paste_name]-($paste_url)"
+            export urls=$urls
+            echo "::set-env name=urls::$urls"
           done
 
       - name: Update README
@@ -44,7 +46,7 @@ jobs:
         run: |
           sed -i "/^## Links/,\$d" README.md
           echo "## Links" >> README.md
-          echo -e "${{ urls }}" >> README.md
+          echo -e "$urls" >> README.md
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add README.md
