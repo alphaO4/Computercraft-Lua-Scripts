@@ -22,22 +22,23 @@ jobs:
         id: upload
         run: |
           urls=""
-          for file in ${{ steps.files.outputs.files }}; do
+          while IFS= read -r file; do
             file_contents=$(cat "$file")
             paste_name=$(basename "$file")
             api_key="${{ secrets.PASTEBIN_API_KEY }}"
             response=$(curl -s -X POST https://pastebin.com/api/api_post.php \
               --data-urlencode "api_dev_key=$api_key" \
+              --data-urlencode "api_user_key=$user_key" \
               --data-urlencode "api_option=paste" \
               --data-urlencode "api_paste_name=$paste_name" \
-              --data-urlencode "api_paste_code=$file_contents" \ 
-              --data-urlencode "api_paste_private=0" \
+              --data-urlencode "api_paste_code=$file_contents" \
+              --data-urlencode "api_paste_private=1" \
               --data-urlencode "api_paste_expire_date=N" \
-              --data-urlenvode "api_paste_format=lua" )
+              --data-urlencode "api_paste_format=lua" )
             paste_url=$(echo "$response" | jq -r '.[].url')
             urls="$urls\n- [$paste_name]($paste_url)"
-          done
-          echo "::set-output name=urls::$urls"
+          done <<< "${{ steps.files.outputs.files }}"
+
       - name: Update README
         if: success()
         run: |
