@@ -16,7 +16,7 @@ jobs:
         id: files
         run: |
           changed_files=$(git diff-tree --no-commit-id --name-only -r HEAD~1..HEAD)
-          new_files=$(echo "${changed_files}" | grep '^scripts/')
+          new_files=$(echo "${changed_files}" | grep '^script/')
           echo "::set-output name=files::$new_files"
       - name: Upload files to Pastebin
         id: upload
