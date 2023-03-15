@@ -39,7 +39,7 @@ jobs:
               --data-urlencode "api_paste_private=1" \
               --data-urlencode "api_paste_expire_date=N" \
               --data-urlencode "api_paste_format=lua" )
-            paste_url = $response
+            paste_url=$response
             echo "$response"
             urls+="$paste_name - $paste_url"
             echo "Uploaded $file to $paste_url"
