@@ -18,12 +18,13 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: |
-            script/*.lua
+            scripts/*.lua
 
       - name: Upload files to Pastebin
         id: upload
         run: |
           for file in %{{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "Uploading $file to Pastebin"
             file_contents=$(cat $file)
             paste_name=$(basename $file)
             api_key="${{ secrets.PASTEBIN_API_KEY }}"
