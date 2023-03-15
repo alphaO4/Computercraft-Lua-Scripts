@@ -19,10 +19,12 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: |
-            scripts/*.lua
+            script/*.lua
 
       - name: Upload files to Pastebin
         id: upload
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           urls=""
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
@@ -49,6 +51,8 @@ jobs:
 
       - name: Update README
         if: success()
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           echo "$urls"
           echo -e "$urls" >> README.md
