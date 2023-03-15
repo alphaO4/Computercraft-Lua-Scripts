@@ -19,15 +19,17 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: |
-            scripts/*.lua
+            script/*.lua
 
       - name: Upload files to Pastebin
         id: upload
         run: |
+          urls = ""
+          
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "Uploading $file to Pastebin"
             file_contents=$(cat $file)
             paste_name=$(basename $file)
+            echo "Uploading $paste_name to Pastebin"
             api_key="${{ secrets.PASTEBIN_API_KEY }}"
             response=$(curl -s -X POST https://pastebin.com/api/api_post.php \
               --data-urlencode "api_dev_key=$api_key" \
@@ -38,13 +40,13 @@ jobs:
               --data-urlencode "api_paste_private=1" \
               --data-urlencode "api_paste_expire_date=N" \
               --data-urlencode "api_paste_format=lua" )
-            paste_url=response
+            paste_url= $response
             echo "$response"
-            urls="$urls\n- [$paste_name]-($paste_url)"
-            export urls=$urls
-            echo "::set-env name=urls::$urls"
+            urls+="$paste_name - $paste_url"
             echo "Uploaded $file to $paste_url"
           done
+          export urls=$urls
+          echo "::set-env name=urls::$urls"
 
       - name: Update README
         if: success()
