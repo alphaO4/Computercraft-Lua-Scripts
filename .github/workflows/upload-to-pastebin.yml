@@ -17,12 +17,12 @@ jobs:
         id: files
         run: |
           changed_files=$(git diff-tree --no-commit-id --name-only -r $(git hash-object -t tree /dev/null)..HEAD)
-          new_files=$(echo "${changed_files}" | grep -E '^scripts/' | xargs -I{} sh -c 'test -f "{}" && echo "{}"')
+          new_files=$(echo "${changed_files}" | grep -E '^script/' | xargs -I{} sh -c 'test -f "{}" && echo "{}"')
           echo "::set-output name=files::$new_files"
       - name: Upload files to Pastebin
         id: upload
         run: |
-          find scripts/ -type f -name '*.lua' -print | while IFS= read -r -d '' file; do
+          find script/ -type f -name '*.lua' -print | while IFS= read -r -d '' file; do
             file_contents=$(cat "$file")
             paste_name=$(basename "$file")
             api_key="${{ secrets.PASTEBIN_API_KEY }}"
@@ -39,6 +39,7 @@ jobs:
             urls="$urls\n- [$paste_name]-($paste_url)"
             export urls=$urls
             echo "::set-env name=urls::$urls"
+            printf "Uploaded $file to $paste_url
           done
 
       - name: Update README
