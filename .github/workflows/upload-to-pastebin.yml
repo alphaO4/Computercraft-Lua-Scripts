@@ -17,12 +17,12 @@ jobs:
         id: files
         run: |
           changed_files=$(git diff-tree --no-commit-id --name-only -r $(git hash-object -t tree /dev/null)..HEAD)
-          new_files=$(echo "${changed_files}" | grep -E '^script/' | xargs -I{} sh -c 'test -f "{}" && echo "{}"')
+          new_files=$(echo "${changed_files}" | grep -E '^scripts/' | xargs -I{} sh -c 'test -f "{}" && echo "{}"')
           echo "::set-output name=files::$new_files"
       - name: Upload files to Pastebin
         id: upload
         run: |
-          find script/ -type f -name '*.lua' -print | while IFS= read -r -d '' file; do
+          find scripts/ -type f -name '*.lua' -print | while IFS= read -r -d '' file; do
             file_contents=$(cat "$file")
             paste_name=$(basename "$file")
             api_key="${{ secrets.PASTEBIN_API_KEY }}"
@@ -35,7 +35,8 @@ jobs:
               --data-urlencode "api_paste_private=1" \
               --data-urlencode "api_paste_expire_date=N" \
               --data-urlencode "api_paste_format=lua" )
-            paste_url= response
+            paste_url=response
+            echo "$response"
             urls="$urls\n- [$paste_name]-($paste_url)"
             export urls=$urls
             echo "::set-env name=urls::$urls"
@@ -45,8 +46,7 @@ jobs:
       - name: Update README
         if: success()
         run: |
-          sed -i "/^## Links/,\$d" README.md
-          echo "## Links" >> README.md
+          echo "$urls"
           echo -e "$urls" >> README.md
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
