@@ -13,16 +13,18 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y curl jq
-      - name: List new files
-        id: files
-        run: |
-          changed_files=$(git diff-tree --no-commit-id --name-only -r $(git hash-object -t tree /dev/null)..HEAD)
-          new_files=$(echo "${changed_files}" | grep -E '^scripts/' | xargs -I{} sh -c 'test -f "{}" && echo "{}"')
-          echo "::set-output name=files::$new_files"
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            script/*.lua
+
       - name: Upload files to Pastebin
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
         id: upload
         run: |
-          find scripts/ -type f -name '*.lua' -print | while IFS= read -r -d '' file; do
+          for file in %{{ steps.changed-files.outputs.all_changed_files }}; do
             file_contents=$(cat "$file")
             paste_name=$(basename "$file")
             api_key="${{ secrets.PASTEBIN_API_KEY }}"
@@ -42,7 +44,6 @@ jobs:
             echo "::set-env name=urls::$urls"
             echo "Uploaded $file to $paste_url"
           done
-          echo "found urls: $urls"
 
       - name: Update README
         if: success()
