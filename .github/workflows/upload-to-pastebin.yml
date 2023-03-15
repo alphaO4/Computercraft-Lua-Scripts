@@ -19,10 +19,11 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: |
-            scripts/*.lua
+            script/*.lua
 
       - name: Upload files to Pastebin
         id: upload
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
           urls=""
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
